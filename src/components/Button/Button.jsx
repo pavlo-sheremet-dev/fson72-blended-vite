@@ -1,25 +1,33 @@
-import classNames from 'classnames';
-import PropTypes from 'prop-types';
-import React from 'react';
-import styles from './Button.module.css';
+import classNames from "classnames";
+import PropTypes from "prop-types";
+import React, { useState } from "react";
+import styles from "./Button.module.css";
+import { useUpdateCommentMutation } from "../../redux/commentApi";
 
-export const Button = ({ children, counter, role = 'thumbsUp', id }) => {
+export const Button = ({ children, counter, role = "thumbsUp", id }) => {
+  const [isVote, setIsVote] = useState(false);
+  const [updateComment, { isLoading }] = useUpdateCommentMutation();
   const variants = {
-    [styles.thumbsUp]: role === 'thumbsUp',
-    [styles.thumbsDown]: role === 'thumbsDown',
+    [styles.thumbsUp]: role === "thumbsUp",
+    [styles.thumbsDown]: role === "thumbsDown",
   };
 
-  const onBtnHandleClick = () => {
-    console.log('click');
+  const onBtnHandleClick = async () => {
+    const updatingComment = { id, [role]: isVote ? counter - 1 : counter + 1 };
+    await updateComment(updatingComment).unwrap();
+    setIsVote((prevState) => !prevState);
+
+    console.log("click", updatingComment);
   };
 
   return (
     <button
       className={classNames(styles.button, variants)}
-      type='button'
+      type="button"
       counter={counter}
       onClick={onBtnHandleClick}
       id={id}
+      disabled={isLoading}
     >
       {children}
 
